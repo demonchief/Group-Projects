@@ -1,0 +1,212 @@
+import java.io.*;
+import java.util.*;
+
+class RestaurantManagementSystem {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        Restaurant restaurant = new Restaurant();
+
+        while (true) {
+            System.out.println("Welcome to the Restaurant Management System!");
+            System.out.println("1. Admin");
+            System.out.println("2. User");
+            System.out.println("3. Exit");
+            System.out.print("Enter your choice: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (choice) {
+                case 1:
+                    adminMenu(scanner, restaurant);
+                    break;
+                case 2:
+                    userMenu(scanner, restaurant);
+                    break;
+                case 3:
+                    System.out.println("Thank you for using the Restaurant Management System!");
+                    System.exit(0);
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        }
+    }
+
+    private static void adminMenu(Scanner scanner, Restaurant restaurant) {
+        while (true) {
+            System.out.println("\nAdmin Menu:");
+            System.out.println("1. Add Menu Item");
+            System.out.println("2. Remove Menu Item");
+            System.out.println("3. Display Menu");
+            System.out.println("4. Save Menu to File");
+            System.out.println("5. Load Menu from File");
+            System.out.println("6. Back");
+            System.out.print("Enter your choice: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (choice) {
+                case 1:
+                    System.out.print("Enter item name: ");
+                    String itemName = scanner.nextLine();
+                    System.out.print("Enter item price: ");
+                    double itemPrice = scanner.nextDouble();
+                    scanner.nextLine();
+                    restaurant.addMenuItem(itemName, itemPrice);
+                    System.out.println("Menu item added successfully!");
+                    break;
+                case 2:
+                    System.out.print("Enter item name to remove: ");
+                    String itemToRemove = scanner.nextLine();
+                    restaurant.removeMenuItem(itemToRemove);
+                    System.out.println("Menu item removed successfully!");
+                    break;
+                case 3:
+                    restaurant.displayMenu();
+                    break;
+                case 4:
+                    try {
+                        System.out.print("Enter file name to save menu: ");
+                        String fileName = scanner.nextLine();
+                        restaurant.saveMenuToFile(fileName);
+                        System.out.println("Menu saved to file successfully!");
+                    } catch (IOException e) {
+                        
+                        System.out.println("Error occurred while saving the menu to file: " + e.getMessage());
+                    }
+                    break;
+                case 5:
+                    try {
+                        System.out.print("Enter file name to load menu: ");
+                        String fileName = scanner.nextLine();
+                        restaurant.loadMenuFromFile(fileName);
+                        System.out.println("Menu loaded from file successfully!");
+                    } catch (IOException e) {
+                        System.out.println("Error occurred while loading the menu from file: " + e.getMessage());
+                    }
+                    break;
+                case 6:
+                    return;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        }
+    }
+
+    private static void userMenu(Scanner scanner, Restaurant restaurant) {
+        while (true) {
+            System.out.println("\nUser Menu:");
+            System.out.println("1. Place Order");
+            System.out.println("2. Display Orders");
+            System.out.println("3. Back");
+            System.out.print("Enter your choice: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (choice) {
+                case 1:
+                    System.out.print("Enter table number: ");
+                    int tableNumber = scanner.nextInt();
+                    scanner.nextLine();
+                    System.out.print("Enter item names (comma-separated): ");
+                    String[] itemNames = scanner.nextLine().split(",");
+                    restaurant.placeOrder(tableNumber, itemNames);
+                    System.out.println("Order placed successfully!");
+                    break;
+                case 2:
+                    restaurant.displayOrders();
+                    break;
+                case 3:
+                    return;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        }
+    }
+}
+
+class Restaurant {
+    private Map<String, Double> menu;
+    private List<Order> orders;
+
+    public Restaurant() {
+        this.menu = new HashMap<>();
+        this.orders = new ArrayList<>();
+    }
+
+    public void addMenuItem(String itemName, double itemPrice) {
+        menu.put(itemName, itemPrice);
+    }
+
+    public void removeMenuItem(String itemName) {
+        menu.remove(itemName);
+    }
+
+    public void displayMenu() {
+        System.out.println("Menu:");
+        for (Map.Entry<String, Double> entry : menu.entrySet()) {
+            System.out.println(entry.getKey() + ": Rs" + entry.getValue());
+        }
+    }
+
+    public void placeOrder(int tableNumber, String[] itemNames) {
+        List<String> items = Arrays.asList(itemNames);
+        Order order = new Order(tableNumber, items);
+        orders.add(order);
+    }
+
+    public void displayOrders() {
+        System.out.println("Orders:");
+        for (Order order : orders) {
+            System.out.println("Table Number: " + order.getTableNumber());
+            System.out.println("Items: " + order.getItems());
+            System.out.println("--------------------");
+        }
+    }
+
+    public void saveMenuToFile(String fileName) throws IOException {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(fileName))) {
+            for (Map.Entry<String, Double> entry : menu.entrySet()) {
+                writer.println(entry.getKey() + "," + entry.getValue());
+            }
+        }
+    }
+
+    public void loadMenuFromFile(String fileName) throws IOException {
+        menu.clear();
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length == 2) {
+                    String itemName = parts[0];
+                    double itemPrice = Double.parseDouble(parts[1]);
+                    menu.put(itemName, itemPrice);
+                }
+            }
+        }
+    }
+}
+
+class Order {
+    private int tableNumber;
+    private List<String> items;
+
+    public Order(int tableNumber, List<String> items) {
+        this.tableNumber = tableNumber;
+        this.items = items;
+    }
+
+    public int getTableNumber() {
+        return tableNumber;
+    }
+
+    public List<String> getItems() {
+        return items;
+    }
+}
+
+
+
+
+
+
